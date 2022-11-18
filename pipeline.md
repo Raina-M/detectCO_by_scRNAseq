@@ -4,7 +4,7 @@ N.B.: Please check the original paper for more deatails.
 > The manuscript is still under preparation
 
 ### 1. GMRs selection on phased reference genome
-Genotyping markers on reference (GMRs) are able to distinguish two haplotypes, and thus they will also be used for gametes genotyping. You can choose other tools to do alignments and SNP calling. Here I show an example by `bowtie2` and `bcftools`.
+Genotyping markers on reference (GMRs) are able to distinguish two haplotypes, and thus they will also be used for gametes genotyping. You can choose other tools to do alignments and SNP calling. Here I show an example by using `bowtie2` and `bcftools`. The derived SNPs were converted by [SHOREmap](http://bioinfo.mpipz.mpg.de/shoremap/).
 ```
 # ----- Mapping NGS reads to haplotype 1 of phased reference genome -----
 # index reference
@@ -89,4 +89,50 @@ do
     rm ${BC}.sam
 done
 ```
-Before moving forward, it is noteworthy that our single-cell library was prepared for mixed pollens from two different species - *R. breviuscula* and *R. tenuis*, so we need to assign each cell with a species identity. To this end, we also mapped reads across all cells to the other species, and then compare the alignment rates between two species to determine which species that a certain cell exactly comes from. The alignment rate can be read from `hisat2` log file `aln.stdout`.
+Next, eliminate PCR-related quantification biases using [UMIcollapse](https://github.com/Daniel-Liu-c0deb0t/UMICollapse), which makes use of the UMIs that we extracted during barcode correction.
+```
+cd demultiplexed_cells
+for BC in *
+do
+    cd demultiplexed_cells/$BC
+    samtools index ${BC}.sorted.bam
+    
+    umicollapse bam -i ${BC}.sorted.bam  \
+                    -o ${BC}.sorted.dedup.bam \
+                    > umi_collapse.stdout
+done
+```
+#### - Optional: Separation of cells by species origin 
+Before moving forward, it is noteworthy that our single-cell library was prepared for mixed pollens from two different species - *R. breviuscula* and *R. tenuis*, so we need to assign each cell with a species identity. To this end, we mapped reads across all cells to both species, and then compare the alignment rates between two species to determine which species that a certain cell exactly comes from. The alignment rate can be read from `hisat2` log file `aln.stdout`, and read number kept can be read from `umi_collapse.stdout`.
+
+### 4. SNP calling across gametes and selection of markers (GMGs)
+SNP calling for gametes were also done by `bcftools` but you can choose your own tool. The following code is just for one cell, identified by `$BC` (barcode). In practice, you need loop all valid cells. [TIGER](https://github.com/Imoteph/TIGER_Whole-Genome_Genotyping-by-Sequencing) is a tool for CO detection for F2 offspring. Here we only use one function from TIGER. You can check the original TIGER paper for details, but this script is also included in this github page.
+```
+# ----- SNP calling -----
+# mpileup to generating genotype likelihood
+bcftools mpileup -Oz -o ${BC}.mpileup.gz -f reference_hap1.fa ${BC}.sorted.dedup.bam
+
+echo -e "*\t*\t*\t*\t2" > ploidy.txt
+
+# call variants
+bcftools call -Am -Ov --ploidy-file ploidy.txt ${BC}.mpileup.gz > ${BC}.vcf
+
+# ----- Converting variants to desired format -----
+# extract DP4 lines
+bcftools query -f '%CHROM %POS %REF %ALT %QUAL [ %INDEL %DP %DP4]\n' ${BC}.vcf -o ${BC}.comma.txt
+
+# replace comma separators with tabs
+tr ',' '\t' < ${BC}.comma.txt > ${BC}.tabbed.txt
+rm ${BC}.comma.txt
+
+# get rid of mitochondria and chloroplast reads;
+# create columns for read counts for ref allele and alt allele 
+# by adding the first two of the DP4 fields and the second two of the DP4 fields.
+awk '{if ($1 !="ChrC" && $1!="ChrM") print $1 "\t" $2 "\t" $3 "\t" $8+$9 "\t"  $4 "\t"  $10+$11}' \
+    ${BC}.tabbed.txt > ${BC}.input
+rm ${BC}.tabbed.txt
+
+# compare with GMRs and find the overlap between gamete SNPs and GMRs
+perl $TIGER/get_subset.pl ${BC}.input 1,2 GMRs.txt 2,3 0 > ${BC}_input_corrected.txt
+rm ${BC}.input
+```
