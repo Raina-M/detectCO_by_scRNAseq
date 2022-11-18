@@ -136,3 +136,34 @@ rm ${BC}.tabbed.txt
 perl $TIGER/get_subset.pl ${BC}.input 1,2 GMRs.txt 2,3 0 > ${BC}_input_corrected.txt
 rm ${BC}.input
 ```
+
+### 5. Removal of doublets
+```
+while read BC
+do
+    awk '$4!=0 || $6!=0' ${BC}_input_corrected.txt > ${BC}_input.tmp
+    marker_num=`wc -l ${BC}_input.tmp | cut -d" " -f1`
+    # count genotype switching times
+    awk '{
+        if      ( $4 / ($4+$6) < 0.2) print 0;
+        else if ( $4 / ($4+$6) > 0.8) print 1;
+        else print 0.5;
+    }' ${BC}_input.tmp > ${BC}_smt_genotypes.txt
+    head -n-1 ${BC}_smt_genotypes.txt > tmp1
+    tail -n+2 ${BC}_smt_genotypes.txt > tmp2
+    switch_num=`paste tmp1 tmp2 | awk '$2-$1!=0' | wc -l`
+    echo -e $BC"\t"$marker_num"\t"$switch_num >> switches.stats 
+
+    rm ${BC}_input.tmp
+    rm ${BC}_smt_genotypes.txt
+    rm tmp*
+done < BC_dedup_alnrate_gt25.list
+```
+### 6. Crossover calling
+```
+while read BC
+do
+    Rscript hapCO_identification.R -i ${WD}/3_SNP_calling/${BC}/input_corrected.txt \
+                                   -p $BC -g reference_hap1.genome -o outdir -c 50
+done < BC_rm_dbs.list
+```
