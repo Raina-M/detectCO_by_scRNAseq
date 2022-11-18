@@ -1,4 +1,4 @@
-#get_subset.pl
+# get_subset.pl
 # by Joerg Hagmann
 
 #! /usr/bin/perl
