@@ -136,6 +136,7 @@ rm ${BC}.tabbed.txt
 perl $TIGER/get_subset.pl ${BC}.input 1,2 GMRs.txt 2,3 0 > ${BC}_input_corrected.txt
 rm ${BC}.input
 ```
+You are supposed to have genotying markers for each gametes (GMGs) after finishing this step. which would then be used for CO calling. However, not all gametes are viable for CO calling due to contaminations or insufficient of markers. Thus, some filtering is needed before identification of COs.
 
 ### 5. Removal of doublets
 ```
@@ -160,6 +161,7 @@ do
 done < BC_dedup_alnrate_gt25.list
 ```
 ### 6. Crossover calling
+Crossovers are identified based on the genotype conversion events. Due to the noisz signlas in scRNA-seq data, smoothing is necessary before define genotype of a certain region to avoid artifact genotype conversion.
 ```
 while read BC
 do
