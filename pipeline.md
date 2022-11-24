@@ -136,9 +136,11 @@ rm ${BC}.tabbed.txt
 perl $TIGER/get_subset.pl ${BC}.input 1,2 GMRs.txt 2,3 0 > ${BC}_input_corrected.txt
 rm ${BC}.input
 ```
-You are supposed to have genotying markers for each gametes (GMGs) after finishing this step. which would then be used for CO calling. However, not all gametes are viable for CO calling due to contaminations or insufficient of markers. Thus, some filtering is needed before identification of COs.
+You are supposed to have genotying markers for each gametes (GMGs) after finishing this step. which would then be used for CO calling. However, not all gametes are viable for CO calling due to contaminations or insufficient markers. Thus, some filtering is needed before identification of COs.
 
-### 5. Removal of doublets
+### 5. Gamete filtering by GMGs
+Cells with few GMGs are not reliable for CO detection and can be discarded. You need to set a threshold by considering your genome size, GMG numbers across all gametes as well as what CO resolution you expect to get in the end.
+To remove doublets, count the times of switches of GMGs’ genotype across gametes. Cells with frequent switches, i.e., switching rate (genotype switching times/number of GMGs) greater than a cutoff (we used 0.07, but you need to find your own cutoff), are doublets.
 ```
 while read BC
 do
@@ -146,26 +148,34 @@ do
     marker_num=`wc -l ${BC}_input.tmp | cut -d" " -f1`
     # count genotype switching times
     awk '{
-        if      ( $4 / ($4+$6) < 0.2) print 0;
-        else if ( $4 / ($4+$6) > 0.8) print 1;
-        else print 0.5;
-    }' ${BC}_input.tmp > ${BC}_smt_genotypes.txt
+        if      ( $4 / ($4+$6) < 0.2) print 0;   # ref genotype
+        else if ( $4 / ($4+$6) > 0.8) print 1;   # alt genotype
+        else print 0.5;                          # undecided
+    }' ${BC}_input.tmp > ${BC}_smt_genotypes.txt # smoothed genotype of this cell
     head -n-1 ${BC}_smt_genotypes.txt > tmp1
     tail -n+2 ${BC}_smt_genotypes.txt > tmp2
-    switch_num=`paste tmp1 tmp2 | awk '$2-$1!=0' | wc -l`
+    switch_num=`paste tmp1 tmp2 | awk '$2-$1!=0' | wc -l`   # genotype switching times
     echo -e $BC"\t"$marker_num"\t"$switch_num >> switches.stats 
 
     rm ${BC}_input.tmp
     rm ${BC}_smt_genotypes.txt
     rm tmp*
-done < BC_dedup_alnrate_gt25.list
+done < barcode.list
 ```
+```
+# cells whose switch rate > 0.07 are doublets, others (<=0.07) are singleton
+awk '$2>=400' switches.stats | awk '$3/$2<=0.07 {print $1}' > barcode_gt400markers_no_doublets.list
+# also print the singletons whose switch times >= 100
+# ! manual check if those cells are doublets after calling CO
+# awk '$2>=400' switches.stats | awk '$3/$2<=0.07 && $3>=100 {print $1}' > singletons_gt100switch.list
+```
+
 ### 6. Crossover calling
 Crossovers are identified based on the genotype conversion events. Due to the noisz signlas in scRNA-seq data, smoothing is necessary before define genotype of a certain region to avoid artifact genotype conversion.
 ```
 while read BC
 do
-    Rscript hapCO_identification.R -i ${WD}/3_SNP_calling/${BC}/input_corrected.txt \
-                                   -p $BC -g reference_hap1.genome -o outdir -c 50
-done < BC_rm_dbs.list
+    Rscript hapCO_identification.R -i ${BC}_input_corrected.txt \
+                                   -p $BC -g reference_hap1.genome -o outdir
+done < barcode_gt400markers_no_doublets.list
 ```
