@@ -1,10 +1,10 @@
 # Crossover calling pipeline
 
 N.B.: Please check the original paper for more deatails.
-> The manuscript is still under preparation
+> Castellani M, Zhang M, Thangavel G, Mata-Sucre Y, Lux T, A. Campoy J. A., Marek M, Huettel B, Sun H, Mayer K. F. X., Schneeberger K & Marques A. (2023). Meiotic recombination dynamics in plants with repeat-based holocentromeres sheds light on the primary drivers of crossover patterning.
 
-### 1. GMRs selection on phased reference genome
-Genotyping markers on reference (GMRs) are able to distinguish two haplotypes, and thus they will also be used for gametes genotyping. You can choose other tools to do alignments and SNP calling. Here I show an example by using `bowtie2` and `bcftools`. The derived SNPs were converted by [SHOREmap](http://bioinfo.mpipz.mpg.de/shoremap/).
+### 1. Selection of markers on phased reference genome
+We selected allelic SNPs as genotyping markers on reference to distinguish two haplotypes. There are varities of tools for alignments and SNP calling. Here I show an example by using `bowtie2` and `bcftools`. The derived SNPs were then converted by [SHOREmap](http://bioinfo.mpipz.mpg.de/shoremap/).
 ```
 # ----- Mapping NGS reads to haplotype 1 of phased reference genome -----
 # index reference
@@ -46,7 +46,7 @@ cut -f2 sc_reads_corrected.tsv | sort | uniq -c | awk -F"," 'NF==1' | grep -v "*
 awk '$1>5000 {print $2}' vaible_BC.stats > viable_BC_gt5k_reads.list
 awk 'FNR==NR{a[$1]=$1; next}; $2 in a {print $0;}' viable_BC_gt5k_reads.list sc_reads_corrected.tsv > sc_reads.tsv
 ```
-After correction of barcodes and obtaining viable barcodes, we then split the one single raw sequencing file into cell-specific RNA seqeunces based on the barcodes, i.e., all sequences with the same cell barcodes belong to the same cell. This step can also be called demultiplxing.
+After correction of barcodes and obtaining viable barcodes, we then split the one single raw sequencing file into cell-specific RNA seqeunces based on the barcodes, i.e., all sequences with the same cell barcodes belong to the same cell. This step is called demultiplxing.
 ```
 # split one single tsv file from 'bcctools correct' into cell/barcode-specific files
 # every file will be named by the 2nd field with .tsv as suffix, i.e. corrected barcode + .tsv
