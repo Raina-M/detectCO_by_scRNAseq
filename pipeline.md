@@ -105,7 +105,7 @@ done
 #### - Optional step: Separation of cells by species origin 
 Before moving forward, it is noteworthy that our single-cell library was prepared for mixed pollens from two different species - *R. breviuscula* and *R. tenuis*, so we need to assign each cell with a species identity. To this end, we mapped reads across all cells to both species, and then compare the alignment rates between two species to determine which species that a certain cell exactly comes from. The alignment rate can be read from `hisat2` log file `aln.stdout`, and read number kept can be read from `umi_collapse.stdout`. If a cell was assigned to a ceratin species but the alignment rate was below 25%, this cell would be discarded in our case. Further detailed description of this step can be found in [separate_mixed_pollens.md](https://github.com/Raina-M/detectCO_by_scRNAseq/blob/main/separate_mixed_pollens.md).
 
-### 4. SNP calling and selection of markers (GMGs) across gametes
+### 4. SNP calling and selection of markers in gametes
 SNP calling for gametes were also done by `bcftools` but you can of course choose other tools. The following code is just for one cell, identified by `$BC` (barcode). In practice, you need loop all valid cells. In the last step, `get_subset.pl` was originally from [TIGER](https://github.com/Imoteph/TIGER_Whole-Genome_Genotyping-by-Sequencing), a tool for genotyping and CO detection for F2 offspring. You can check the original TIGER paper for details, but this script is also included in this github page.
 ```
 # ----- SNP calling -----
@@ -136,11 +136,11 @@ rm ${BC}.tabbed.txt
 perl $TIGER/get_subset.pl ${BC}.input 1,2 GMRs.txt 2,3 0 > ${BC}_input_corrected.txt
 rm ${BC}.input
 ```
-You are supposed to have genotying markers for each gametes (GMGs) after finishing this step. which would then be used for CO calling. However, not all gametes are viable for CO calling due to contaminations or insufficient markers. Thus, some filtering is needed before identification of COs.
+You are supposed to have genotying markers for each gametes after finishing this step. which would then be used for CO calling. However, not all gametes are viable for CO calling due to contaminations or insufficient markers. Thus, some filtering is needed before identification of COs.
 
-### 5. Gamete filtering by GMGs
-Cells with few GMGs are not reliable for CO detection and can be discarded. You need to set a threshold by considering your genome size, GMG numbers across all gametes as well as what CO resolution you expect to get in the end.
-To remove doublets, count the times of switches of GMGs’ genotype across gametes. Cells with frequent switches, i.e., switching rate (genotype switching times/number of GMGs) greater than a cutoff (we used 0.07, but you need to find your own cutoff), are doublets.
+### 5. Gamete filtering by gebotyping markers
+Cells with few markers are not reliable for CO detection thus can be discarded. You need to set a threshold by considering your genome size, marker numbers across all gametes as well as what CO resolution you expect to get in the end.
+To remove doublets, count the times of switches of markers’ genotype across gametes. Cells with frequent switches, i.e., switching rate (genotype switching times/number of markers) greater than a cutoff (we used 0.07, but you need to find your own cutoff), are doublets.
 ```
 while read BC
 do
