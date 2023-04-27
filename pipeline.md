@@ -26,7 +26,7 @@ SHOREmap convert --marker aln.vcf --folder out_dir -runid myID > convert.log
 # mapping quality over 50, alternative allele coverage between 5 and 30, and allele frequency between 0.4 nd 0.6
 awk '$6>50 && $7>=5 && $7<=30 && $8>=0.4 && $8<=0.6' myID_converted_variant.txt > GMRs.txt
 ```
-The threshold of selecting GMRs could vary case by case, so it is suggested to plot the distribution of important features and then make a decision based on the observation. It might be worth mentioning that reference genome used here only contains chromosomal scaffolds becasue we can only detect crossover on chromosomes.
+The threshold of selecting markers could vary case by case, so it is suggested to plot the distribution of important features (e.g., allele frequency, coverage, mapping quality, etc.) and then make a decision based on the observation. It might be worth mentioning that reference genome used here only contains chromosomal scaffolds becasue we only detect crossover on chromosomes.
 
 ### 2. Preprocessing scRNA-seq data
 Raw scRNA-seq data usually include barcode errors and contaminations such as doublets, ambient RNA, etc. So we need to correct those errors beforehand.
