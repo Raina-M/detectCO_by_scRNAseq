@@ -1,7 +1,5 @@
 # Separate *R. breviuscula* scRNA-seq data from mixed pollen nuclei sequences 
-For multiplexing purpose, we prepared a scRNA-seq library for mixed *R. breviuscula* and *R. tenuis* pollen nuclei. Therefore, we need to separate *R. breviuscula* data out before doing any further analysis.
-
-Preprocessing of raw scRNA sequencing data, pipeline
+For multiplexing purpose, we prepared a scRNA-seq library for mixed *R. breviuscula* and *R. tenuis* pollen nuclei. Therefore, we need to separate *R. breviuscula* data out before doing any further analysis. To this end, we firstly align the scRNA-seq reads of all demultiplexed cells to both *R. breviuscula* and *R. tenuis* reference genome and then remove PCR-related quantification biases (AKA deduplication) using [UMIcollapse](https://github.com/Daniel-Liu-c0deb0t/UMICollapse). For a single cell, if the alignment rate to *R. breviuscula* is much higher than that to *R. tenuis*, then we say this cell is from *R. breviuscula* and vice versa. This part has been delineated in the [main pipeline](https://github.com/Raina-M/detectCO_by_scRNAseq/blob/main/pipeline.md). Now, we resume from obtaining alingment rates of each cell to *R. breviuscula* and *R. tenuis* genome.
 
 build reference genome index files
 
