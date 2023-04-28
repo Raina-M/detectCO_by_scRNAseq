@@ -1,6 +1,6 @@
 # Crossover calling pipeline
 
-N.B.: Please check the original paper for more deatails.
+N.B.: All methods mentioned in this pipeline are interpreted in our publication as well, Please check the original paper for more deatails.
 > Castellani M, Zhang M, Thangavel G, Mata-Sucre Y, Lux T, A. Campoy J. A., Marek M, Huettel B, Sun H, Mayer K. F. X., Schneeberger K & Marques A. (2023). Meiotic recombination dynamics in plants with repeat-based holocentromeres sheds light on the primary drivers of crossover patterning.
 
 ### 1. Selection of markers on phased reference genome
@@ -22,9 +22,9 @@ bcftools call -Avm -Ov --threads $CPU --ploidy-file ploidy.txt aln.mpileup.gz > 
 # ----- Converting VCF -----
 SHOREmap convert --marker aln.vcf --folder out_dir -runid myID > convert.log
 
-# ----- Select allelic SNPs as GMRs -----
+# ----- Select allelic SNPs as reference markers -----
 # mapping quality over 50, alternative allele coverage between 5 and 30, and allele frequency between 0.4 nd 0.6
-awk '$6>50 && $7>=5 && $7<=30 && $8>=0.4 && $8<=0.6' myID_converted_variant.txt > GMRs.txt
+awk '$6>50 && $7>=5 && $7<=30 && $8>=0.4 && $8<=0.6' myID_converted_variant.txt > reference_markers.txt
 ```
 The threshold of selecting markers could vary case by case, so it is suggested to plot the distribution of important features (e.g., allele frequency, coverage, mapping quality, etc.) and then make a decision based on the observation. It might be worth mentioning that reference genome used here only contains chromosomal scaffolds becasue we only detect crossover on chromosomes.
 
@@ -132,8 +132,8 @@ awk '{if ($1 !="ChrC" && $1!="ChrM") print $1 "\t" $2 "\t" $3 "\t" $8+$9 "\t"  $
     ${BC}.tabbed.txt > ${BC}.input
 rm ${BC}.tabbed.txt
 
-# compare with GMRs and find the overlap between gamete SNPs and GMRs
-perl $TIGER/get_subset.pl ${BC}.input 1,2 GMRs.txt 2,3 0 > ${BC}_input_corrected.txt
+# compare with reference markers and find the overlap between gamete SNPs and reference markers
+perl $TIGER/get_subset.pl ${BC}.input 1,2 reference_markers.txt 2,3 0 > ${BC}_input_corrected.txt
 rm ${BC}.input
 ```
 You are supposed to have genotying markers for each gametes after finishing this step. which would then be used for CO calling. However, not all gametes are viable for CO calling due to contaminations or insufficient markers. Thus, some filtering is needed before identification of COs.
@@ -171,7 +171,7 @@ awk '$2>=400' switches.stats | awk '$3/$2<=0.07 {print $1}' > barcode_gt400marke
 ```
 
 ### 6. Crossover calling
-Crossovers are identified based on the genotype conversion events. Due to the noisz signlas in scRNA-seq data, smoothing is necessary before define genotype of a certain region to avoid artifact genotype conversion.
+Crossovers are identified based on the genotype conversion events. Due to the noisy signlas in scRNA-seq data, smoothing is necessary before determining the genotype of a certain region to avoid artifact genotype conversion.
 ```
 while read BC
 do
