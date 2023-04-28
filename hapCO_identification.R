@@ -1,11 +1,11 @@
-# CO identification in gamete nuclei (Note: only homozygous change of alleles would be captured).
+# CO identification in gamete nuclei
 # writen by Hequan Sun, MPIPZ Email: sunhequan@gmail.com
 
 # Modified by Meng Zhang (mzhang@mpipz.mpg.de)
 # on May 25th, 2022
 # Adapted to Rhynchospora CO identification with scRNA-seq from pollens
 
-# Last modification: Sep 28th, 2022, change smooth function 1 by AF sooth, not genotype
+# Last modification: Sep 28th, 2022, change smooth function 1 by AF smooth, not genotype
 
 
 library("optparse", lib.loc="/home/mzhang/R/x86_64-pc-linux-gnu-library/4.0/")
