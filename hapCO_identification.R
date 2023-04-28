@@ -8,7 +8,7 @@
 # Last modification: Sep 28th, 2022, change smooth function 1 by AF smooth, not genotype
 
 
-library("optparse", lib.loc="/home/mzhang/R/x86_64-pc-linux-gnu-library/4.0/")
+library(optparse) # lib.loc="/home/mzhang/R/x86_64-pc-linux-gnu-library/4.0/"
 
 option_list <- list(
   make_option(c("-i", "--input"), type = "character", default = NULL, 
@@ -22,10 +22,10 @@ option_list <- list(
   make_option(c("-o", "--outpath"), type="character", default = getwd(),
               help = "Output file path [default: current working directory]",
               metavar = "file_path"),
-  make_option(c("-c","--cell_markers"), type = "integer", default = 400,
+  make_option(c("-c","--cell_markers"), type = "integer", default = 500,
               help = "Minimum number of markers required in the cell [default: %default]",
               metavar = "int"),
-  make_option(c("-s","--block_size"), type = "integer", default = 2000000,
+  make_option(c("-s","--block_size"), type = "integer", default = 1000000,
               help = "Minimum block size to define genotype [default: %default]",
               metavar = "int"),
   make_option(c("-n","--marker_num"), type = "integer", default = 5,
