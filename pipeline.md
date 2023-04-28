@@ -176,6 +176,9 @@ Crossovers are identified based on the genotype conversion events. Due to the no
 while read BC
 do
     Rscript hapCO_identification.R -i ${BC}_input_corrected.txt \
-                                   -p $BC -g reference_hap1.genome -o outdir
+                                   -p $BC
+                                   -c 400
+                                   -g reference_hap1.genome
+                                   -o outdir
 done < barcode_gt400markers_no_doublets.list
 ```
