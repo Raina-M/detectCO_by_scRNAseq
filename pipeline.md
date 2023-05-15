@@ -62,10 +62,8 @@ do
     cd demultiplexed_cells/$BC
     mv ../$file .
     
-    # awk '{print "@"$1"_"$4"\n"$5"\n+\n"$9}' $file  > ${BC}_R1.fastq
-    # awk '{print "@"$1"_"$4"\n"$6"\n+\n"$10}' $file > ${BC}_R2.fastq
-    awk '{print "@"$1"_"$4"\n"$5$6"\n+\n"$9$10}' $file  > ${BC}.fastq
-    # rm $file
+    awk '{print "@"$1"_"$4"\tR1\n"$5"\n+\n"$9"\n@"$1"_"$4"\tR2\n"$6"\n+\n"$10}' $file  > ${BC}.fastq
+    rm $file
 done
 ```
 In the last step, we need to include UMI in the read header as this information is necessary for deduplication later. As for converting `.tsv` into `.fastq` file, you can also convert into read pairs. Here we converted to a single-end like read because `bcftools` does not call SNPs on reads whose mated reads are not mapped but most scRNA-seq read 1 cannot be mapped. So if you used a different tool for SNP calling in gametes, please check out this point as well.
