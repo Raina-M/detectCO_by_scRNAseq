@@ -138,7 +138,7 @@ rm ${BC}.input
 ```
 You are supposed to have genotying markers for each gametes after finishing this step. which would then be used for CO calling. However, not all gametes are viable for CO calling due to contaminations or insufficient markers. Thus, some filtering is needed before identification of COs.
 
-### 5. Gamete filtering by gebotyping markers
+### 5. Gamete filtering by genotyping markers
 Cells with few markers are not reliable for CO detection thus can be discarded. You need to set a threshold by considering your genome size, marker numbers across all gametes as well as what CO resolution you expect to get in the end.
 To remove doublets, count the times of switches of markers’ genotype across gametes. Cells with frequent switches, i.e., switching rate (genotype switching times/number of markers) greater than a cutoff (we used 0.07, but you need to find your own cutoff), are doublets.
 ```
