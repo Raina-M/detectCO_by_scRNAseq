@@ -1,7 +1,7 @@
 # Crossover calling pipeline
 
-N.B.: All methods mentioned in this pipeline are interpreted in our publication as well, Please check the original paper for more deatails.
-> Castellani M, Zhang M, Thangavel G, Mata-Sucre Y, Lux T, A. Campoy J. A., Marek M, Huettel B, Sun H, Mayer K. F. X., Schneeberger K & Marques A. (2023). Meiotic recombination dynamics in plants with repeat-based holocentromeres sheds light on the primary drivers of crossover patterning.
+N.B.: All methods mentioned in this pipeline are interpreted in our publication as well, Please check the [preprint](https://www.biorxiv.org/content/10.1101/2023.04.28.538594v1.abstract) for more details.
+> Castellani, Marco, et al. "Meiotic recombination dynamics in plants with repeat-based holocentromeres shed light on the primary drivers of crossover patterning." bioRxiv (2023): 2023-04.
 
 ### 1. Selection of markers on phased reference genome
 We selected allelic SNPs as genotyping markers on reference to distinguish two haplotypes. There are varities of tools for alignments and SNP calling. Here I show an example by using `bowtie2` and `bcftools`. The derived SNPs were then converted by [SHOREmap](http://bioinfo.mpipz.mpg.de/shoremap/).
