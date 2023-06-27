@@ -21,4 +21,4 @@ awk '$5/($3+$5)>=0.6  {print $1}' readnum_dedup.stats > Rt_BC_dedup.list  # cell
 ```
 Following this, we can see that not all cells were assigned to a certain species, there are cells with similar alignment reads to both species. They are potentially doublets that captured cells from different species, which should be discarded.
 
-[^1]: Castellani M, Zhang M, Thangavel G, Mata-Sucre Y, Lux T, A. Campoy J. A., Marek M, Huettel B, Sun H, Mayer K. F. X., Schneeberger K & Marques A. (2023). Meiotic recombination dynamics in plants with repeat-based holocentromeres sheds light on the primary drivers of crossover patterning.
+[^1]: Castellani, Marco, et al. "Meiotic recombination dynamics in plants with repeat-based holocentromeres shed light on the primary drivers of crossover patterning." bioRxiv (2023): 2023-04.
