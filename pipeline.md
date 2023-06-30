@@ -4,7 +4,7 @@ N.B.: All methods mentioned in this pipeline are interpreted in our publication 
 > Castellani, Marco, et al. "Meiotic recombination dynamics in plants with repeat-based holocentromeres shed light on the primary drivers of crossover patterning." bioRxiv (2023): 2023-04.
 
 ### 1. Selection of markers on phased reference genome
-We selected allelic SNPs as genotyping markers on reference to distinguish two haplotypes. There are varities of tools for alignments and SNP calling. Here I show an example by using `bowtie2` and `bcftools`. The derived SNPs were then converted by [SHOREmap](http://bioinfo.mpipz.mpg.de/shoremap/).
+We selected allelic SNPs as genotyping markers on reference to distinguish two haplotypes. There are varieties of tools for alignments and SNP calling. Here I show an example by using `bowtie2` and `bcftools`. The derived SNPs were then converted by [SHOREmap](http://bioinfo.mpipz.mpg.de/shoremap/).
 ```
 # ----- Mapping NGS reads to haplotype 1 of phased reference genome -----
 # index reference
@@ -37,39 +37,39 @@ bcctools correct --alts 16 --spacer 12 \            # 10x v3 library: 16 barcode
                   > sc_reads_corrected.tsv          # corrected sequences with extracted barcodes and UMIs
 
 # filter barcode:
-    # record the number of occurence of each barcode
+    # record the number of occurrence of each barcode
     # then remove the cell with multiple barcodes
-    # or wihtout determined barcodes
+    # or without determined barcodes
 cut -f2 sc_reads_corrected.tsv | sort | uniq -c | awk -F"," 'NF==1' | grep -v "*" > viable_BC.stats    
 
 # select cells with over a certain amount of reads (e.g. 5k reads)
 awk '$1>5000 {print $2}' viable_BC.stats > viable_BC_gt5k_reads.list
 awk 'FNR==NR{a[$1]=$1; next}; $2 in a {print $0;}' viable_BC_gt5k_reads.list sc_reads_corrected.tsv > sc_reads.tsv
 ```
-After correction of barcodes and obtaining viable barcodes, we then split the one single raw sequencing file into cell-specific RNA seqeunces based on the barcodes, i.e., all sequences with the same cell barcodes belong to the same cell. This step is called demultiplxing.
+After correction of barcodes and obtaining viable barcodes, we then split the one single raw sequencing file into cell-specific RNA sequences based on the barcodes, i.e., all sequences with the same cell barcodes belong to the same cell. This step is called demultiplexing.
 ```
 # split one single tsv file from 'bcctools correct' into cell/barcode-specific files
 # every file will be named by the 2nd field with .tsv as suffix, i.e. corrected barcode + .tsv
-[ ! -d demultiplexed_cells ] && mkdir -p demultiplexed_cells
-cd demultiplexed_cells
+[ ! -d ${your_path}/demultiplexed_cells ] && mkdir -p ${your_path}/demultiplexed_cells
+cd ${your_path}/demultiplexed_cells
 awk '{print>$2".tsv"}' sc_reads.tsv
 
 # convert .tsv to .fastq format
 for file in *.tsv
 do
     BC=${file%.tsv*}
-    [ ! -d demultiplexed_cells/$BC ] && mkdir -p demultiplexed_cells/$BC
-    cd demultiplexed_cells/$BC
+    [ ! -d ${your_path}/demultiplexed_cells/$BC ] && mkdir -p ${your_path}/demultiplexed_cells/$BC
+    cd ${your_path}/demultiplexed_cells/$BC
     mv ../$file .
     
     awk '{print "@"$1"_"$4"\tR1\n"$5"\n+\n"$9"\n@"$1"_"$4"\tR2\n"$6"\n+\n"$10}' $file  > ${BC}.fastq
     rm $file
 done
 ```
-In the last step, we need to include UMI in the read header as this information is necessary for deduplication later. As for converting `.tsv` into `.fastq` file, you can also convert into read pairs. Here we converted to a single-end like read because `bcftools` does not call SNPs on reads whose mated reads are not mapped but most scRNA-seq read 1 cannot be mapped. So if you used a different tool for SNP calling in gametes, please check out this point as well.
+In the last step, we need to include UMI in the read header as this information is necessary for deduplication later. As for converting `.tsv` into `.fastq` file, you can also convert it into read pairs. Here we converted to a single-end-like read because `bcftools` does not call SNPs on reads whose mated reads are not mapped but most scRNA-seq read 1 cannot be mapped. So if you used a different tool for SNP calling in gametes, please check out this point as well.
 
 ### 3. Mapping scRNA-seq reads from gametes to reference
-If annotations of the genome is not available, hisat2 can be used to map the RNA reads of each cell. If you have annotations, you can of course try STAR or any other RNA aligners.
+If annotations of the genome are not available, hisat2 can be used to map the RNA reads of each cell. If you have annotations, you can of course try STAR or any other RNA aligners.
 ```
 # build reference genome index files
 hisat2-build -p $CPU reference_hap1.fa reference_hap1_index
@@ -101,10 +101,10 @@ do
 done
 ```
 #### - Optional step: Separation of cells by species origin 
-Before moving forward, it is noteworthy that our single-cell library was prepared for mixed pollens from two different species - *R. breviuscula* and *R. tenuis*, so we need to assign each cell with a species identity. To this end, we mapped reads across all cells to both species, and then compare the alignment rates between two species to determine which species that a certain cell exactly comes from. The alignment rate can be read from `hisat2` log file `aln.stdout`, and read number kept can be read from `umi_collapse.stdout`. If a cell was assigned to a ceratin species but the alignment rate was below 25%, this cell would be discarded in our case. Further detailed description of this step can be found in [separate_mixed_pollens.md](https://github.com/Raina-M/detectCO_by_scRNAseq/blob/main/separate_mixed_pollens.md).
+Before moving forward, it is noteworthy that our single-cell library was prepared for mixed pollens from two different species - *R. breviuscula* and *R. tenuis*, so we need to assign each cell a species identity. To this end, we mapped reads across all cells to both species, and then compare the alignment rates between two species to determine which species that a certain cell exactly comes from. The alignment rate can be read from `hisat2` log file `aln.stdout`, and read number kept can be read from `umi_collapse.stdout`. If a cell was assigned to a certain species but the alignment rate was below 25%, this cell would be discarded in our case. A further detailed description of this step can be found in [separate_mixed_pollens.md](https://github.com/Raina-M/detectCO_by_scRNAseq/blob/main/separate_mixed_pollens.md).
 
 ### 4. SNP calling and selection of markers in gametes
-SNP calling for gametes were also done by `bcftools` but you can of course choose other tools. The following code is just for one cell, identified by `$BC` (barcode). In practice, you need loop all valid cells. In the last step, `get_subset.pl` was originally from [TIGER](https://github.com/Imoteph/TIGER_Whole-Genome_Genotyping-by-Sequencing), a tool for genotyping and CO detection for F2 offspring. You can check the original TIGER paper for details, but this script is also included in this github page.
+SNP calling for gametes was also done by `bcftools` but you can of course choose other tools. The following code is just for one cell, identified by `$BC` (barcode). In practice, you need to loop all valid cells. In the last step, `get_subset.pl` was originally from [TIGER](https://github.com/Imoteph/TIGER_Whole-Genome_Genotyping-by-Sequencing), a tool for genotyping and CO detection for F2 offspring. You can check the original TIGER paper for details, but this script is also included on this GitHub page.
 ```
 # ----- SNP calling -----
 # mpileup to generating genotype likelihood
@@ -134,11 +134,11 @@ rm ${BC}.tabbed.txt
 perl $TIGER/get_subset.pl ${BC}.input 1,2 reference_markers.txt 2,3 0 > ${BC}_input_corrected.txt
 rm ${BC}.input
 ```
-You are supposed to have genotying markers for each gametes after finishing this step. which would then be used for CO calling. However, not all gametes are viable for CO calling due to contaminations or insufficient markers. Thus, some filtering is needed before identification of COs.
+You are supposed to have genotyping markers for each gamete after finishing this step. which would then be used for CO calling. However, not all gametes are viable for CO calling due to contaminations or insufficient markers. Thus, some filtering is needed before the identification of COs.
 
 ### 5. Gamete filtering by genotyping markers
-Cells with few markers are not reliable for CO detection thus can be discarded. You need to set a threshold by considering your genome size, marker numbers across all gametes as well as what CO resolution you expect to get in the end.
-To remove doublets, count the times of switches of markers’ genotype across gametes. Cells with frequent switches, i.e., switching rate (genotype switching times/number of markers) greater than a cutoff (we used 0.07, but you need to find your own cutoff), are doublets.
+Cells with few markers are not reliable for CO detection and thus can be discarded. You need to set a threshold by considering your genome size, marker numbers across all gametes as well as what CO resolution you expect to get in the end.
+To remove doublets, count the times of switches of markers’ genotypes across gametes. Cells with frequent switches, i.e., switching rate (genotype switching times/number of markers) greater than a cutoff (we used 0.07, but you need to find your own cutoff), are doublets.
 ```
 while read BC
 do
@@ -169,7 +169,7 @@ awk '$2>=400' switches.stats | awk '$3/$2<=0.07 {print $1}' > barcode_gt400marke
 ```
 
 ### 6. Crossover calling
-Crossovers are identified based on the genotype conversion events. Due to the noisy signlas in scRNA-seq data, smoothing is necessary before determining the genotype of a certain region to avoid artifact genotype conversion.
+Crossovers are identified based on the genotype conversion events. Due to the noisy signals in scRNA-seq data, smoothing is necessary before determining the genotype of a certain region to avoid artifact genotype conversion.
 ```
 while read BC
 do
