@@ -45,6 +45,7 @@ cut -f2 sc_reads_corrected.tsv | sort | uniq -c | awk -F"," 'NF==1' | grep -v "*
 # select cells with over a certain amount of reads (e.g. 5k reads)
 awk '$1>5000 {print $2}' viable_BC.stats > viable_BC_gt5k_reads.list
 awk 'FNR==NR{a[$1]=$1; next}; $2 in a {print $0;}' viable_BC_gt5k_reads.list sc_reads_corrected.tsv > sc_reads.tsv
+# remove sc_reads_corrected.tsv to save storage, which is usually not needed in the following steps.
 ```
 After correction of barcodes and obtaining viable barcodes, we then split the one single raw sequencing file into cell-specific RNA sequences based on the barcodes, i.e., all sequences with the same cell barcodes belong to the same cell. This step is called demultiplexing.
 ```
