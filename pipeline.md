@@ -111,7 +111,7 @@ SNP calling for gametes was also done by `bcftools` but you can of course choose
 # mpileup to generating genotype likelihood
 bcftools mpileup -Oz -o ${BC}.mpileup.gz -f reference_hap1.fa ${BC}.sorted.dedup.bam
 
-echo -e "*\t*\t*\t*\t2" > ploidy.txt
+echo -e "*\t*\t*\t*\t1" > ploidy.txt
 
 # call variants
 bcftools call -Am -Ov --ploidy-file ploidy.txt ${BC}.mpileup.gz > ${BC}.vcf
