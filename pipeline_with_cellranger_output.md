@@ -51,4 +51,4 @@ done
 ```
 This step is usually time-consuming, so you can write the commands in the `while` loop as a shell script and run it in parallel. After finishing this step, you can do more filtering based on the aligned or uniquely aligned read number across all cells. This is optional and flexible. You can also change the information you would like to note down for the subsequent analysis. Here I use mapping quality more than 3 (`awk '$5>3'`) to define the uniquely mapped reads based on the scoring scheme of mapping quality in `STAR`.
 
-The remaining analysis should be the same as the `pipeline.md`. If you have any questions or suggestions, welcome to discuss with me.
+The remaining analysis should be the same as the `pipeline.md`. Since alignment is already done, you can directly jump to "SNP calling and selection of markers in gametes". If you have any questions or suggestions, welcome to discuss with me.
