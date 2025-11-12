@@ -4,3 +4,6 @@ A pipeline for crossover identification based on scRNA-seq data from gametes, in
 Please cite the following publication when using our pipeline.
 
 > Castellani, M., Zhang, M., Thangavel, G. et al. Meiotic recombination dynamics in plants with repeat-based holocentromeres shed light on the primary drivers of crossover patterning. Nat. Plants 10, 423–438 (2024). https://doi.org/10.1038/s41477-024-01625-y
+
+## Update
+A pipeline (`pipeline_with_cellranger_output.md`) for those who would like to use the alignment output from 10X cellranger was added. Although the example is shown with scRNA-seq data, the pipeline is also suitable for scATAC-seq data for gamete genotyping. Users just need to replace the alignment file with the output from cellranger-atac.
