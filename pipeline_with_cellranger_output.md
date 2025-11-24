@@ -38,7 +38,8 @@ do
   cd ${WD}/demultiplex/$barcode
 
   # extract read names with this barcode
-  samtools view -h $BAM | egrep "^@|CB:Z:${barcode}" | samtools sort -o ${barcode%-1}.sorted.bam
+  # samtools view -h $BAM | egrep "^@|CB:Z:${barcode}" | samtools sort -o ${barcode%-1}.sorted.bam
+  samtools view -d CB:${barcode} -hb -@16 $WD/aln_tmp.bam | samtools sort -@8 > ${barcode}.sorted.bam # fatest way tested so far
   
   # total read number
   read_num=`awk -v bc=$barcode '$2==bc {print $1}' $WD/read_num.stats`
